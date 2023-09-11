@@ -5,6 +5,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { FinalFacStdProp } from './StdTable';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { student_add, student_edit } from './services/Student';
 
 
 interface StdTableAddEditProps {
@@ -43,26 +44,12 @@ const StdTableAddEdit = ({initialData,handle} : StdTableAddEditProps) => {
   });
 
   const onSubmit: SubmitHandler<FinalFacStdProp> = async(data) => {
+    if(initialData){
+      student_edit({data,handle})
+    }else{
+      student_add({data,handle})
+    }
     
-    let url = data.id == 0 ? "/add" :"/edit/"+data.id;
-    await axios.post(`/student`+url, data, {
-      headers: {
-
-      },withCredentials : true
-    })
-      .then((response) => {
-        if (response.status === 200) return response;
-      })
-      .then((data) => {
-        if (data) {
-          toast.success("Student data added succesfully!")
-          handle();
-          console.log(data)
-        }
-      })
-      .catch((error) => {
-        toast.error("Failed in creating student data")
-      })
   };
 
 

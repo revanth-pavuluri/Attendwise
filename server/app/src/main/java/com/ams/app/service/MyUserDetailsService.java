@@ -13,6 +13,7 @@ import com.ams.app.model.Student;
 import com.ams.app.repository.FacultyRepository;
 import com.ams.app.repository.StudentRepository;
 
+import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -20,21 +21,20 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor(onConstructor = @__({@Autowired}))
 public class MyUserDetailsService implements UserDetailsService {
     
-    @Autowired
-	private StudentRepository Srepo;
+	private StudentRepository studentRepository;
   	
-    @Autowired
-	private FacultyRepository Frepo;
+	private FacultyRepository facultyRepository;
    
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         
-        Student student = Srepo.findByUsername(username);
+        Student student = studentRepository.findByUsername(username);
 
 		if(student == null) {
-            Faculty faculty = Frepo.findByUsername(username);
+            Faculty faculty = facultyRepository.findByUsername(username);
             if(faculty == null){
 			    throw new UsernameNotFoundException("Invalid username or password.");
             }else{

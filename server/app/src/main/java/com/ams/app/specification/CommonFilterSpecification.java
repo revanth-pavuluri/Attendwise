@@ -11,19 +11,19 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.persistence.criteria.*;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
-import com.ams.app.dto.Searchrequestdto;
-import com.ams.app.dto.Requestdto;
+import com.ams.app.dto.SearchrequestDTO;
+import com.ams.app.dto.RequestDTO;
 
 @Service
 public class CommonFilterSpecification<T> {
 
-     public Specification<T> getSearchSpecification(List<Searchrequestdto> searchreqs, Requestdto.Operators globalOperator) {
+     public Specification<T> getSearchSpecification(List<SearchrequestDTO> searchreqs, RequestDTO.Operators globalOperator) {
 
         return (root, query, criteriaBuilder) -> {
 
             List<Predicate> predicates = new ArrayList<>();
             List<String> cols = getColumnNames(root);
-            for(Searchrequestdto requestDto : searchreqs){
+            for(SearchrequestDTO requestDto : searchreqs){
                 Expression<String> roots;
                 
                 if(cols.indexOf(requestDto.getColumn()) == -1){
@@ -100,9 +100,9 @@ public class CommonFilterSpecification<T> {
 
             }
 
-            if(globalOperator.equals(Requestdto.Operators.AND)) {
+            if(globalOperator.equals(RequestDTO.Operators.AND)) {
                 return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
-            }else if(globalOperator.equals(Requestdto.Operators.OR)){
+            }else if(globalOperator.equals(RequestDTO.Operators.OR)){
                 return criteriaBuilder.or(predicates.toArray(new Predicate[0]));
             }else{
                 return criteriaBuilder.and(predicates.toArray(new Predicate[0]));

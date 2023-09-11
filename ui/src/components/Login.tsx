@@ -1,35 +1,22 @@
 
+import React, { createContext, useContext, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import logo from './images/logo.png'
 import { object, string } from 'yup'
 import { yupResolver } from '@hookform/resolvers/yup'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { useUserdetails } from './UserContext'
 import { toast } from 'react-toastify';
 // import 'react-toastify/dist/ReactToastify.min.css';
 
-export function getCookie(name: string): string | null{
-  const nameLenPlus = (name.length + 1);
-  return document.cookie
-    .split(';')
-    .map(c => c.trim())
-    .filter(cookie => {
-      return cookie.substring(0, nameLenPlus) === `${name}=`;
-    })
-    .map(cookie => {
-      return decodeURIComponent(cookie.substring(nameLenPlus));
-    })[0] || null;
-}
-export const deleteCookie = function(name:string) {
-  document.cookie = name+"=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-};
+
 
 const Login= () => {  
   
   const {setUserdetails} = useUserdetails();
   
-
+  const location = useLocation();
   // const [jwt, setJwt] = useLocalState
   const navigate = useNavigate();
   const validationSchema = object().shape({
@@ -50,15 +37,15 @@ const Login= () => {
   })
   // if(window.localStorage.getItem('jwt')){
   //   console.log('jwt found')
-    if(window.localStorage.getItem('role') === "student"){
+    if(window.localStorage.getItem('role') == "student"){
       console.log("student page");
       navigate('/u/dashboard');
     }
-    if(window.localStorage.getItem('role') === "faculty"){
+    if(window.localStorage.getItem('role') == "faculty"){
       console.log("faculty page");
       navigate('/f/dashboard');
     }
-
+  // }
   
   const onSubmit = async (data : any) => {
   
@@ -75,11 +62,12 @@ const Login= () => {
         if (data) {
           setUserdetails(data.data)
           window.localStorage.setItem("userdeets",JSON.stringify(data.data))
-          var cookie =  getCookie("LoginToken");
-          axios.defaults.headers.common["Login"] = `Bearer ${cookie}` 
+          window.localStorage.setItem("Jwt",data.data['password'])
+          axios.defaults.headers.common["Login"] = `Bearer ${data.data['password']}` 
           console.log(data)
+          console.log(data.data['password'])
           
-          if(data.data['role'] === "Prof"){
+          if(data.data['role'] == "Prof"){
             console.log(data.data["role"])
             window.localStorage.setItem("role","faculty")
             navigate("/f/dashboard");
@@ -138,11 +126,6 @@ const Login= () => {
             <label htmlFor="password" className="block text-sm font-medium leading-6 text-Black">
               Password
             </label>
-            {/* <div className="text-sm">
-              <a href="#" className="font-semibold text-Red-400 hover:text-Red-500">
-                Forgot password?
-              </a>
-            </div> */}
           </div>
           <div className="mt-2">
             <input
@@ -166,13 +149,6 @@ const Login= () => {
           </button>
         </div>
       </form>
-
-      {/* <p className="mt-10 text-center text-sm text-gray-500">
-        Not a member?{' '}
-        <a href="#" className="font-semibold leading-6 text-Aqua-500 hover:text-Aqua-400">
-          Start a 14 day free trial
-        </a>
-      </p> */}
     </div>
   </div>
 </>

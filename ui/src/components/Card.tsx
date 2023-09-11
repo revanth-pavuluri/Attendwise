@@ -19,9 +19,9 @@ const Card = ({aid,facultyname,subjectname,subjectcode,periods,status,type,stude
  </span>
 </div>
 </div>
-    <b>{subjectname}</b><br/>
-    Periods : <b>{periods}</b><br/>
-    Faculty : <b>{facultyname}</b><br/>
+    <span className="text-bold">{subjectname}</span><br/>
+    Periods : <span className="text-bold">{periods}</span><br/>
+    Faculty : <span className="text-bold">{facultyname}</span><br/>
     {studentstatus}<br/>
     Updated On : {updatedon.split("T")[1].split(".")[0]}
 </div>

@@ -1,15 +1,13 @@
 package com.ams.app.dto;
 import java.sql.Timestamp;
-import javax.persistence.Id;
 import lombok.Data;
 
 @Data
-public class Facultydto {
-  @Id
+public class FacultyDTO {
   private int id;
   private String username;
   private String name;
   private String role;
-  private Timestamp createdon;
-  private Timestamp updatedon;
+  private Timestamp createdOn;
+  private Timestamp updatedOn;
 }

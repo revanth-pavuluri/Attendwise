@@ -31,7 +31,6 @@ function App() {
         <Route path='dashboard' element = {<Dashboard/>}/>
         <Route path = 'stats' element = {<Stats/>}/>
         <Route path = 'profile' element = {<Profile/>}/>
-        <Route path = 'logout' element = {<Logout/>}/>
         </Route>
       </Route>
       

@@ -2,7 +2,6 @@ package com.ams.app.model;
 import java.sql.Timestamp;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -12,27 +11,36 @@ import javax.persistence.Table;
 import org.hibernate.annotations.CreationTimestamp;
 import lombok.Data;
 
-@Table(name="Absentdata")
+@Table(name="absent_data")
 @Entity
 @Data
-public class Absentdata {
+public class AbsentData {
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private int id;
-  @ManyToOne(fetch = FetchType.EAGER)
-  @JoinColumn(name="sid")
+  private Long id;
+
+  @Column(name = "student_id")
+  private Long studentId;
+
+  @ManyToOne
+  @JoinColumn(name="student_id", referencedColumnName = "id", insertable = false, updatable = false)
   private Student student;
-  @ManyToOne(fetch = FetchType.EAGER)
-  @JoinColumn(name="aid")
-  private Attendrecord attendrecord;
-  @Column(name="createdon")
+
+  @Column(name = "attend_record_id")
+  private Long attendRecordId;
+
+  @ManyToOne
+  @JoinColumn(name="attend_record_id", referencedColumnName = "id", insertable = false, updatable = false)
+  private AttendRecord attendRecord;
+
+  @Column(name="created_on")
   @CreationTimestamp
-  private Timestamp createdon;
-  public Absentdata(Student student, Attendrecord attendrecord) {
+  private Timestamp createdOn;
+
+  
+  public AbsentData(Student student, AttendRecord attendRecord) {
     this.student = student;
-    this.attendrecord = attendrecord;
-  }
-  public Absentdata(){
-    
+    this.attendRecord = attendRecord;
   }
 }

@@ -28,11 +28,6 @@ export const stdNavs = [
     id: "profile",
     title: "Profile",
   },
-  {
-    id : "logout",
-    title : "Logout",
-  }
-  
 ];
 export const facNavs = [
   {

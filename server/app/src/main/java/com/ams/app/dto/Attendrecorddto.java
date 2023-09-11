@@ -1,23 +1,20 @@
 package com.ams.app.dto;
+import java.sql.Date;
 import java.sql.Timestamp;
-import javax.persistence.Id;
+
+import com.ams.app.model.AttendRecord.AttendanceStatus;
+
 import lombok.Data;
 
 @Data
-public class Attendrecorddto {
-    @Id
+public class AttendrecordDTO {
     private int id;
-    private String facultyname;
-    private int facultyid;
-    private int subjectid;
-    private String subjectname;
-    private String Subjectcode;
+    private FacultyDTO faculty;
+    private SubjectDTO subject;
     private int periods;
-    private int status;
-    private String type;
-    private String data;
-    private String classname;
-    private String date;
-    private Timestamp createdon;
-    private Timestamp updatedon;
+    private AttendanceStatus status;
+    private String className;
+    private Date date;
+    private Timestamp createdOn;
+    private Timestamp updatedOn;
 }

@@ -1,9 +1,9 @@
 import axios, { AxiosResponse } from "axios";
 import { ReactNode, createContext, useContext, useEffect, useState } from "react";
-import { getCookie } from "./Login";
 type UserDetailsType = {
   id : number,
   name : string,
+  password : string,
   role : string,
   updatedon : string,
   username : string,
@@ -35,8 +35,7 @@ export const UserdetailsProvider = ({children} : {children : ReactNode}) => {
       if(storedData){            
         const data : UserDetailsType = JSON.parse(storedData);
         console.log("Userdetails",data)
-        var cookie =  getCookie("LoginToken")
-        axios.defaults.headers.common["Login"] = `Bearer ${cookie}`         
+        axios.defaults.headers.common["Login"] = `Bearer ${data['password']}`         
         setUserdetails(data)
       }},[]);
       useEffect(() => {

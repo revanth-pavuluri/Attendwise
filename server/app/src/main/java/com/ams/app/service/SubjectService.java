@@ -2,25 +2,25 @@ package com.ams.app.service;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import com.ams.app.model.Subject;
 import com.ams.app.repository.SubjectRepository;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor(onConstructor = @__({@Autowired}))
 public class SubjectService {
     
-    @Autowired
-    private SubjectRepository Srepo;
+    private SubjectRepository subjectRepository;
     
-    public ResponseEntity<Subject> findById(int sid) {
+    public Subject findById(Long sid) {
         try{
-            Subject s = Srepo.findById(sid);
-            if(s == null){
+            Subject subject = subjectRepository.findById(sid);
+            if(subject == null){
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Id not found");
             }
-            return ResponseEntity.ok(s);
+            return subject;
         }catch(ResponseStatusException e){
             throw new ResponseStatusException(e.getStatus(),e.getReason());
         }catch(Exception e){
@@ -28,15 +28,15 @@ public class SubjectService {
         }
     }
     
-    public ResponseEntity<Subject> editSubject(int id, Subject subject){
+    public Subject editSubject(Long id, Subject subject){
         try{
-            Subject s = Srepo.findById(id);
-            if(s == null){
+            Subject result = subjectRepository.findById(id);
+            if(result == null){
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Id not found");
             }
             subject.setId(id);
-            Subject saved = Srepo.save(subject);
-            return ResponseEntity.ok(saved);
+            Subject saved = subjectRepository.save(subject);
+            return saved;
         }catch(ResponseStatusException e){
             throw new ResponseStatusException(e.getStatus(),e.getReason());
         }catch(Exception e){
@@ -44,24 +44,24 @@ public class SubjectService {
         }   
     }
 
-    public ResponseEntity<Subject> save(Subject subject) {
+    public Subject save(Subject subject) {
         try{
-            Subject s = Srepo.save(subject);
-            Subject saved = Srepo.findById(s.getId());
-            return ResponseEntity.ok(saved);
+            Subject result = subjectRepository.save(subject);
+            Subject saved = subjectRepository.findById(result.getId());
+            return saved;
         }catch(Exception e){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,e.getMessage());
         }
     }
     
-    public ResponseEntity<String> deleteSubject(int id){
+    public String deleteSubject(Long id){
         try{
-            Subject s = Srepo.findById(id);
-                if(s == null){
+            Subject subject = subjectRepository.findById(id);
+                if(subject == null){
                     throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Id not found");
                 }
-                Srepo.deleteById(id);
-                return ResponseEntity.ok("Deleted");
+                subjectRepository.deleteById(id.intValue());
+                return "Deleted";
             }catch(ResponseStatusException e){
             throw new ResponseStatusException(e.getStatus(),e.getReason());
         }catch(Exception e){
@@ -69,9 +69,9 @@ public class SubjectService {
         }
         
     }
-    public ResponseEntity<List<Subject>> allSubjects(){
+    public List<Subject> allSubjects(){
          try{
-            return ResponseEntity.ok(Srepo.findAll());
+            return subjectRepository.findAll();
          }catch(Exception e){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,e.getMessage());
          }

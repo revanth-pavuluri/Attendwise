@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import  { useEffect, useState } from 'react';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { FinalFacDashProp } from './FDashboard';
-import axios from 'axios';
-import { toast } from 'react-toastify';
 import { useUserdetails } from './UserContext';
+import { attend_add,attend_edit } from './services/Attendance';
+import { get_all_subjects } from './services/Subject';
 
 
 interface AddEditProps {
@@ -19,25 +19,14 @@ type subType = {
   name : string,
 }
 
-type subTypes = subType[];
+export type subTypes = subType[];
 
 const AttendAddEdit = ({initialData, handle} : AddEditProps) => {
 const [subdetails,SetSubdetails] = useState<subTypes>([])
   const {userdetails} = useUserdetails();
   useEffect(
     () => {
-        (async () =>{
-         await axios.get(`/subject/all`)
-            .then((response) => {
-              if (response.status === 200){
-                SetSubdetails(response.data);
-              };
-             
-            })
-            .catch((error) => {
-              toast.error("Subject loading failed")
-            })
-        })()
+      get_all_subjects(SetSubdetails)
     
   },[]);
   const schema = yup.object().shape({
@@ -72,21 +61,13 @@ const [subdetails,SetSubdetails] = useState<subTypes>([])
 
   const onSubmit: SubmitHandler<FinalFacDashProp> = async(data) => {
     console.log(data)
-    let url = data.id == 0 ? "/add" :"/edit/"+data.id;
-    await axios.post(`/attendance`+url, data, {
-      headers: {
-      },withCredentials : true
-    })
-      .then((response) => {
-        if (response.status === 200) {
-          toast.success("Request added succesfully!")
-          handle();
-          console.log(data)
-        }
-      })
-      .catch((error) => {
-        toast.error("Failed in updating attendance request")
-      })
+    if(initialData){
+      attend_edit({data,handle})
+    }
+    else{
+      attend_add({data, handle})
+    }
+    
   };
 
 

@@ -1,18 +1,14 @@
 package com.ams.app.dto;
-
+import java.sql.Date;
 import java.sql.Timestamp;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
-public class SubjectStatsresponsedto {
-    private String date;
+@AllArgsConstructor
+public class SubjectStatsResponseDTO {
+    private Date date;
     private String status;
     private Timestamp time;
-    
-    public SubjectStatsresponsedto(String date, String status, Timestamp time) {
-        this.date = date;
-        this.status = status;
-        this.time = time;
-    }
 }

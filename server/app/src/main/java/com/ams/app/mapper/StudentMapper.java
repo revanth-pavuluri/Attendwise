@@ -2,34 +2,29 @@ package com.ams.app.mapper;
 import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Component;
-
-import com.ams.app.dto.AttendanceReportdto;
-import com.ams.app.dto.Studentdashresponsedto;
-import com.ams.app.dto.Studentdto;
-import com.ams.app.model.Attendrecord;
+import com.ams.app.dto.AttendanceReportDTO;
+import com.ams.app.dto.StudentDashboardResponseDTO;
+import com.ams.app.dto.StudentDTO;
+import com.ams.app.model.AttendRecord;
 import com.ams.app.model.Student;
 
 @Component
 @Mapper(componentModel = "spring")
 public interface StudentMapper {	
-	StudentMapper INSTANCE = Mappers.getMapper(StudentMapper.class);
-	//@Mapping(source = "password", ignore = true, target = "password")
-    Studentdto modelToDto(Student student);
+
+    StudentDTO map(Student student);
+
 	@Mapping(target = "password", ignore = true,defaultValue = "")
-	Student dtoToModel(Studentdto studentDto);
+	Student map(StudentDTO studentDto);
 
-	List<Studentdto> modelsToDtos(List<Student> student);
+	List<StudentDTO> map(List<Student> student);
 
-	@Mapping(source = "id", target = "aid")
-    @Mapping(source = "faculty.name", target = "facultyname")
-    @Mapping(source = "subject.code", target = "subjectcode")
-    @Mapping(source = "subject.name", target = "subjectname")
-    @Mapping(target="studentstatus", ignore=true)
-    Studentdashresponsedto maptoDashboarddto(Attendrecord attendRecord);
+	@Mapping(source = "id", target = "attendRecordId")
+    @Mapping(target="studentStatus", ignore=true)
+    StudentDashboardResponseDTO map(AttendRecord attendRecord);
 
-    @Mapping(source = "id", target = "sid")
-    @Mapping(target="studentstatus", ignore=true)
-    AttendanceReportdto maptoAttendancereportdto(Student student);
+    @Mapping(source = "id", target = "studentId")
+    @Mapping(target="studentStatus", ignore=true)
+    AttendanceReportDTO maptoAttendancereportdto(Student student);
 }

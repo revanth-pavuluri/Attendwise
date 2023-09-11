@@ -8,6 +8,8 @@ import com.ams.app.model.Faculty;
 @Repository
 @Transactional
 public interface FacultyRepository extends JpaRepository<Faculty, Integer>, JpaSpecificationExecutor<Faculty>{
-    Faculty findById(int Id);
+    
+    Faculty findById(Long Id);
+    
     Faculty findByUsername(String username);
 }

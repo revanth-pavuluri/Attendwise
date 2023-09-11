@@ -14,7 +14,6 @@ import java.io.InputStream;
 
 @Log4j2
 @Component
-
 public class ObjectMapperService {
   public String convertToJson(Object object) {
     if (object == null) {

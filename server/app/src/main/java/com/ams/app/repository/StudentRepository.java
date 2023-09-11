@@ -9,8 +9,11 @@ import com.ams.app.model.Student;
 @Repository
 @Transactional
 public interface StudentRepository extends JpaRepository<Student, Integer>, JpaSpecificationExecutor<Student>{
-    Student findById(int Id);
-    List<Student> findByClassname(String name);
+    
+    Student findById(Long Id);
+    
+    List<Student> findByClassName(String name);
+    
     Student findByUsername(String username);
 }
 

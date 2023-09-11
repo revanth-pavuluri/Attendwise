@@ -12,26 +12,34 @@ import javax.persistence.Table;
 import org.hibernate.annotations.CreationTimestamp;
 import lombok.Data;
 
-@Table(name="Temprecord")
+@Table(name="present_data")
 @Entity
 @Data
-public class Presentdata {
+public class PresentData {
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private int id;
-  @ManyToOne(fetch = FetchType.EAGER)
-  @JoinColumn(name="sid")
-  private Student student;
-  @ManyToOne(fetch = FetchType.EAGER)
-  @JoinColumn(name="aid")
-  private Attendrecord attendrecord;
-  @Column(name="createdon")
-  @CreationTimestamp
-  private Timestamp createdon;
-  public Presentdata() {
+  private Long id;
+  
+  @Column(name = "student_id")
+  private Long studentId;
 
-  }
-  public Presentdata(Student student, Attendrecord attendrecord) {
+  @ManyToOne
+  @JoinColumn(name="student_id", referencedColumnName = "id", insertable = false, updatable = false)
+  private Student student;
+  
+  @Column(name = "attend_record_id")
+  private Long attendRecordId;
+  
+  @ManyToOne
+  @JoinColumn(name="attend_record_id", referencedColumnName = "id", insertable = false, updatable = false)
+  private AttendRecord attendrecord;
+  
+  @Column(name="created_on")
+  @CreationTimestamp
+  private Timestamp createdOn;
+  
+  public PresentData(Student student, AttendRecord attendrecord) {
     this.student = student;
     this.attendrecord = attendrecord;
   }

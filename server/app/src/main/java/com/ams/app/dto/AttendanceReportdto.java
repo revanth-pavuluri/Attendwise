@@ -3,10 +3,10 @@ package com.ams.app.dto;
 import lombok.Data;
 
 @Data
-public class AttendanceReportdto {
-    private int sid;
+public class AttendanceReportDTO {
+    private int studentId;
     private String username;
     private String name;
-    private int rollnumber;
-    private String studentstatus;
+    private int rollNumber;
+    private String studentStatus;
 }

@@ -1,4 +1,4 @@
-package com.ams.app.model;
+package com.ams.app.request;
 import java.io.Serializable;
 import lombok.Data;
 

@@ -6,6 +6,7 @@ import axios from "axios";
 import { useUserdetails } from "./UserContext";
 import { toast } from "react-toastify";
 import { modalContext } from "./Calendar";
+import { mark_with_QR } from "./services/Attendance";
 
 const QrModal  = ({id} : {id : number}) => {
   const {showModal, setShowModal} = useContext(modalContext);
@@ -31,25 +32,7 @@ const QrModal  = ({id} : {id : number}) => {
             const parsedTimestamp = parseInt(result.split("@")[1]);     
              const currentTime = Date.now();
               if(currentTime-parsedTimestamp <= 5000){
-                (async () =>{
-                  await axios.post(`/attendance/mark/${id}/${userdetails.id}`)
-                     .then((response) => {
-                       if (response.status === 200){
-                          setShowModal(false)  
-                          toast.success ("Attendance marked successfully!")   
-                      
-                       }
-                     })
-                     .catch((error) => {
-                      if (error.status === 401 || error.status === 403 || error.status === 400) {
-                        toast.error("Error occured, Try again!!!");
-                      } else if(error.status === 404 || error.status === 504 || error.status === 423 ) {
-                        toast.error(error);
-                      }
-                       
-                     
-                     })
-                 })()
+                mark_with_QR({id,setShowModal})
                  if (scanner) {
                   scanner.clear(); // Stop the scanning process
                 }

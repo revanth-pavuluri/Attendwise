@@ -4,65 +4,39 @@ import { MdArrowBack, MdArrowForward } from "react-icons/md";
 import ReactPaginate from "react-paginate";
 import { toast } from "react-toastify";
 import { BiCheck, BiX } from 'react-icons/bi';
+import Table from "./Table";
+import { get_attendance_report, mark_attendance } from "./services/Attendance";
 
 const itemsPerPage = 10;
 type ManualType = {
-    sid : number,
+    id : number,
     username : string,
     name : string,
     rollnumber : number,
-    studentstatus : string,
+    status : string,
+    [key: string]: any;
 }
 
-type ManualTypes = ManualType[];
+export type ManualTypes = ManualType[];
 
 const Manual = ({aid} : {aid : number}) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(0);
   const [stdDetails,setStdDetails] = useState<ManualTypes>([]);
   const [action,setAction] = useState('')
+  const columns = [
+    { header: 'Student ID', key: 'username' },
+    { header: 'Student Name', key: 'name' },
+    { header: 'Roll No.', key: 'rollnumber' },
+    { header: 'Attendance Status', key: 'status' },
+  ];
   const markAttendance = (url : string) => {
-    (async () =>{
-        await axios.post(url)
-           .then((response) => {
-            console.log(response)
-             if (response.status === 200){
-                setAction(response.data)
-             }
-             })
-           .catch((error) => {
-             toast.error(error)
-           })
-       })()
+    mark_attendance({url,setAction});
+
   }
   useEffect(
     () => {
-      if(aid){
-        (async () =>{
-          await axios.get(`/attendance/report/${aid}/`)
-             .then((response) => {
-              console.log(response)
-               if (response.status === 200) return response;
-               else if (response.status === 401 || response.status === 403) {
-                 console.error("Invalid username or password");
-               } else {
-                 console.error(
-                   "Something went wrong, try again later or reach out to trevor@coderscampus.com"
-                 );
-               }
-             })
-             .then((response) => {
-               if (response) {
-                 setStdDetails(response.data)    
-               }
-             })
-             .catch((error) => {
-               toast.error(error)
-             
-             })
-         })()
-      }
-       
+      get_attendance_report({aid,setStdDetails})
     
  },[action]);
 
@@ -104,35 +78,11 @@ const Manual = ({aid} : {aid : number}) => {
       </div>
       {filteredData.length != 0 ? (
         <>
-        
-        <table className="w-11/12 mx-auto border-rounded border border-gray-300 shadow-md">
-        <thead>
-          <tr className="bg-Aqua-300 text-Black shadow-md ">
-          <th className="p-3 text-center">Student ID</th> 
-          <th className="p-3 text-center">Student Name</th>
-          <th className="p-3 text-center">Roll No.</th>
-            <th className="p-3 text-center">Attendance Status</th>
-            <th className="p-3 text-center">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {paginatedData.map((data, index) => (
-            <tr key={index} className={index % 2 === 0 ? 'bg-gray-100' : ''}>
-              
-              <td className="p-3 text-center">{data.username}</td>
-              <td className="p-3 text-center">{data.name}</td>
-              <td className="p-3 text-center">{data.rollnumber}</td>
-              <td className="p-3 text-center">{data.studentstatus}</td>
-              <td className="p-3 text-center">
-              <div className='grid grid-cols-3 gap-10'>
-              <BiCheck size={30} color="green" onClick={()=>markAttendance(`/attendance/mark/${aid}/${data.sid}`)}/>
-              <BiX size={30} color="red" onClick={()=>markAttendance(`/attendance/unmark/${aid}/${data.sid}`)}/>
-              </div>          
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+        <Table data={paginatedData} columns={columns} actions={{
+          datarole : "manualAttendance",
+          markattendance : markAttendance,
+
+        }}/>
       
       <div className="mt-4 flex flex-col justify-center items-center">
       <ReactPaginate

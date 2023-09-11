@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react"
 import CircleProgress from "./CircleProgress"
-import Progressbar from "./Progressbar"
+import Progressbar, { cardProp } from "./Progressbar"
 import StatTimeline, { StatItemProp} from "./StatTimeline"
 import Modal from "./Modal"
 import axios from "axios"
 import { useUserdetails } from "./UserContext"
+import { get_stats, get_sub_details } from "./services/Student"
 
 
 
@@ -12,62 +13,15 @@ const Stats = () => {
     const [subjectState,setSubjectState] = useState<string | null>(null);
     const [subdetails,setsubdetails] = useState<StatItemProp[]>()
     const {userdetails} = useUserdetails()
-    const [statsdetails,setStatsdetails] = useState<{subjectname : string, percentage:number,subid : number}[]>()
+    const [statsdetails,setStatsdetails] = useState<cardProp[]>([])
     useEffect(
       () => {
-        ( async() => {
-          await axios.get(`/student/stats/${userdetails?.id}`)
-          .then((response) => {
-            if (response.status === 200) return response;
-            else if (response.status === 401 || response.status === 403) {
-              console.error(" 401 or 403 error");
-            } else {
-              console.error(
-                "Something went wrong, try again later"
-              );
-            }
-          })
-          .then((data) => {
-            if (data) {
-              console.log(data)
-              setStatsdetails(data.data)
-            }
-          })
-          .catch((error) => {
-            // Handle errors here
-            console.error(error);
-            console.error("An error occurred during loading.");
-          })
-        })()
+        get_stats(setStatsdetails)
       
       },[userdetails]);  
     useEffect(
       () => {
-        (async() => {
-          if(subjectState != null){
-          await axios.get(`/student/stats/${userdetails?.id}/${subjectState.split("+")[1]}`)
-          .then((response) => {
-            if (response.status === 200) return response;
-            else if (response.status === 401 || response.status === 403) {
-              console.error(" 401 or 403 error");
-            } else {
-              console.error(
-                "Something went wrong, try again later"
-              );
-            }
-          })
-          .then((data) => {
-            if (data) {
-              console.log(data)
-              setsubdetails(data.data)
-            }
-          })
-          .catch((error) => {
-            // Handle errors here
-            console.error(error);
-            console.error("An error occurred during loading.");
-          })
-        }})()
+        get_sub_details({subjectState,setsubdetails})
       
       },[subjectState,userdetails]);
       const [percentage,setPercentage] = useState<number>(0);

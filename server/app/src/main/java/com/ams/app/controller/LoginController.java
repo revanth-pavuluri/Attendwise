@@ -12,26 +12,21 @@ import com.ams.app.mapper.StudentMapper;
 import com.ams.app.model.Faculty;
 import com.ams.app.model.Student;
 import com.ams.app.service.FacultyService;
-import com.ams.app.service.MyUserDetailsService;
 import com.ams.app.service.StudentService;
 
+import lombok.RequiredArgsConstructor;
+
 @RestController
+@RequiredArgsConstructor(onConstructor = @__({@Autowired}))
 public class LoginController {
 	
-	@Autowired
-	StudentService studentService;
+	private StudentService studentService;
     
-	@Autowired
-	FacultyService facultyService;
+	private FacultyService facultyService;
 	
-	@Autowired
-	MyUserDetailsService userDetailsService;
-	
-	@Autowired
-	StudentMapper studentMapper;
+	private StudentMapper studentMapper;
 
-	@Autowired
-	FacultyMapper facultyMapper;
+	private FacultyMapper facultyMapper;
 
 	@RequestMapping(value = "/login", method = RequestMethod.POST)
 	public Object Userdata(HttpServletResponse response) {
@@ -43,12 +38,12 @@ public class LoginController {
 		if(role.equals("STUDENT")){
 			Student s =  studentService.findByUsername(user.getUsername());
             System.out.println("Student Login successful");
-			return studentMapper.modelToDto(s);
+			return studentMapper.map(s);
 		
 		}else if(role.equals("FACULTY")){
 			Faculty f =  facultyService.findByUsername(user.getUsername());
             System.out.println("Faculty Login successful");
-			return facultyMapper.modelToDto(f);
+			return facultyMapper.map(f);
 		}
 		return "Login error occured";
 }

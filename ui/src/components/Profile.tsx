@@ -1,39 +1,16 @@
 import { useEffect, useState } from 'react'
-import { Progressbars } from './Progressbar'
+import { Progressbars, cardProp } from './Progressbar'
 import { useUserdetails } from './UserContext'
 import logo from './images/logo.png'
 import axios from 'axios'
+import { get_stats } from './services/Student'
 
 const Profile = () => {
     const {userdetails} = useUserdetails()
-    const [statsdetails,setStatsdetails] = useState([])
+    const [statsdetails,setStatsdetails] = useState<cardProp[]>([])
     useEffect(
       () => {
-        (async() => {
-          await axios.get(`/student/stats/${userdetails?.id}`)
-          .then((response) => {
-            if (response.status === 200) return response;
-            else if (response.status === 401 || response.status === 403) {
-              console.error(" 401 or 403 error");
-            } else {
-              console.error(
-                "Something went wrong, try again later"
-              );
-            }
-          })
-          .then((data) => {
-            if (data) {
-              console.log(data)
-              setStatsdetails(data.data)
-            }
-          })
-          .catch((error) => {
-            // Handle errors here
-            console.error(error);
-            console.error("An error occurred during loading.");
-          })
-        })()
-      
+        get_stats(setStatsdetails);      
       },[]);
     return(
         <>

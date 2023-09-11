@@ -4,9 +4,8 @@ import { generateDate, months } from "./util/Cal";
 import cn from "./util/Cn";
 import { GrFormNext, GrFormPrevious } from "react-icons/gr";
 import Timeline from "./Timeline";
-import axios from "axios";
 import { useUserdetails } from "./UserContext";
-import { toast } from "react-toastify";
+import { get_student_dashbord } from "./services/Student";
 interface ModalType{
     showModal: boolean;
     setShowModal : React.Dispatch<React.SetStateAction<boolean>>;
@@ -25,26 +24,7 @@ export default function Calendar() {
 	
     useEffect(
 		() => {
-			(async () =>{
-			 await axios.post("student/dashboard", 
-			{    
-					    "date":selectDate.toDate().toLocaleDateString().split('/').reverse().join('-'),
-						"sid":userdetails?.id,}
-			, {
-				headers: {
-				  
-				},withCredentials : true
-			  })
-				.then((response) => {
-				  if (response.status === 200){
-					setTimelinedetails(response.data)
-					console.log(response)
-				  }
-				})
-				.catch((error) => {
-					toast.error(error)
-				})
-			})()
+			get_student_dashbord({selectDate,setTimelinedetails});
 		
     },[selectDate,showModal,userdetails]);
 	return (

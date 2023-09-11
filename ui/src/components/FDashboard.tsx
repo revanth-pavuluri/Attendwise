@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react'
-import { MdArrowBack, MdArrowForward, MdDelete, MdEdit } from 'react-icons/md';
-import { FaCheck, FaFile} from 'react-icons/fa';
+import { MdArrowBack, MdArrowForward} from 'react-icons/md';
 import ReactPaginate from 'react-paginate';
 import AttendAddEdit from './AttendAddEdit';
 import Modal from './Modal';
 import axios from 'axios';
 import { useUserdetails } from './UserContext';
 import { toast } from 'react-toastify';
-import QrGenModal from './QrGenModal';
+
 import Manual from './Manual';
+import Table from './Table';
+import { attendance_OnDelete, finalise_attendance, get_attendance_details } from './services/Attendance';
 
 const itemsPerPage = 15;
 export type FinalFacDashProp =  {        
@@ -25,10 +26,11 @@ export type FinalFacDashProp =  {
     classname: string,        
     date: string,        
     createdon: string,        
-    updatedon: string
+    updatedon: string,
+    [key: string]: any;
 };
 
-type FinalFacDashProps = FinalFacDashProp[];
+export type FinalFacDashProps = FinalFacDashProp[];
 
 const FDashboard = () => {
 
@@ -36,82 +38,33 @@ const FDashboard = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(0);
   const [AddModal, setAddModal] = useState(false);
-  const [EditModal,setEditModal] = useState<FinalFacDashProp>();
-  const [Editbool,seteditbool] = useState(false)
+  const [EditModal,setEditModal] = useState<FinalFacDashProp | false>(false);
   const [manual,setManual] = useState<FinalFacDashProp|false>(false)
   const [finalDetails,setFinalDetails] = useState<FinalFacDashProps>([])
   const[finaliseFlag, setFinaliseFlag] = useState(false)
+  const columns = [
+    { header: 'Date', key: 'date' },
+    { header: 'Class Name', key: 'classname' },
+    { header: 'Subject Name', key: 'subjectname' },
+    { header: 'Periods', key: 'periods' },
+    { header: 'Type', key: 'type' },
+    { header: 'Status', key: 'status' },
+    { header: 'Created', key: 'createdon' },
+    { header: 'Updated', key: 'updatedon' },
+  ];
+  
   const Finalise = (id : number) => {
-    if(window.confirm('Are you sure to finalize?')==true ){
-    (async () =>{
-      await axios.post(`/attendance/finalize/${id}`)
-         .then((response) => {
-          console.log(response)
-           if (response.status === 200){
-              toast.success("Attendance Finalised!")
-              setFinaliseFlag(!finaliseFlag)
-           }
-         })
-         .catch((error) => {
-            toast.error(error);
-         
-         })
-     })()
-  }
+    finalise_attendance({id,finaliseFlag,setFinaliseFlag})
 }
 const [deleteFlag, setDeleteFlag] = useState(false)
   const OnDelete = (id : number) => {
-    if(window.confirm("Are you sure to delete?") == true){
-      if(userdetails.id){
-        (async () =>{
-          await axios.delete(`/attendance/delete/${id}`)
-             .then((response) => {
-               if (response.status === 200){
-                  toast.success("Deleted successfully!")
-                  setDeleteFlag(!deleteFlag)
-               }
-             })
-             .catch((error) => {
-                toast.error(error);
-             
-             })
-         })()
-      }
-    }
+    attendance_OnDelete({id,deleteFlag,setDeleteFlag})
   }
 
   useEffect(
     () => {
-        (async () =>{
-          await axios.get(`/attendance/f/${userdetails.id}`)
-             .then((response) => {
-               if (response.status === 200) return response;
-               else if (response.status === 401 || response.status === 403) {
-                 console.error("Invalid username or password");
-               } else {
-                 console.error(
-                   "Something went wrong, try again later or reach out to trevor@coderscampus.com"
-                 );
-               }
-             })
-             .then((response) => {
-               if (response) {
-                 setFinalDetails(response.data)
-                 console.log(response)
-                     
-               }
-             })
-             .catch((error) => {
-               // Handle errors here
-               console.error(error);
-               console.error("An error occurred during login.");
-             
-             })
-         })()
-  
-       
-    
- },[AddModal,Editbool,deleteFlag,finaliseFlag,manual,userdetails]);
+         get_attendance_details(setFinalDetails)
+ },[AddModal,EditModal,deleteFlag,finaliseFlag,manual,userdetails]);
 
    
 
@@ -139,17 +92,17 @@ const [deleteFlag, setDeleteFlag] = useState(false)
   return (
     <div className="mt-1">
       
-      {Editbool  || AddModal || manual != false ? (
+      {EditModal != false  || AddModal || manual != false ? (
         <Modal body={
           <>
           {manual != false ? <Manual aid = {manual.id}/> : null}
           {AddModal ? <AttendAddEdit handle={()=>setAddModal(false)}/> : null}
-          {Editbool ? <AttendAddEdit initialData={EditModal} handle={()=>seteditbool(false)}/> : null} 
+          {EditModal != false ? <AttendAddEdit initialData={EditModal} handle={()=>setEditModal(false)}/> : null} 
         </>
       }
       header = {
-        {title : AddModal ? 'Add Attendance Request' : Editbool ? 'Edit Attendance Request' : manual != false ?`${manual.date} - ${manual.classname} - ${manual.subjectname}` : '',
-        closehandle : AddModal ? ()=>{setAddModal(false)} : Editbool ? ()=>{seteditbool(false)} : ()=>{setManual(false)}}
+        {title : AddModal ? 'Add Attendance Request' : EditModal != false ? 'Edit Attendance Request' : manual != false ?`${manual.date} - ${manual.classname} - ${manual.subjectname}` : '',
+        closehandle : AddModal ? ()=>{setAddModal(false)} : EditModal ? ()=>{setEditModal(false)} : ()=>{setManual(false)}}
       }
       /> 
       ) : null}
@@ -176,57 +129,14 @@ const [deleteFlag, setDeleteFlag] = useState(false)
       </div>
       {filteredData.length != 0 ? (
         <>
-        
-        <table className="w-11/12 mx-auto border-rounded border border-gray-300 shadow-md">
-        <thead>
-          <tr className="bg-Aqua-300 text-Black shadow-md ">
-          <th className="p-3 text-center">Date</th> 
-          <th className="p-3 text-center">Class Name</th>
-            <th className="p-3 text-center">Subject Name</th>
-            <th className="p-3 text-center">Periods</th>
-            <th className="p-3 text-center">Type</th>
-            <th className="p-3 text-center">Status</th>
-            <th className="p-3 text-center">Created</th>
-            <th className="p-3 text-center">Updated</th>
-            <th className="p-3 text-center">Actions</th>
-            <th className="p-3 text-center">  </th>
-          </tr>
-        </thead>
-        <tbody>
-          {paginatedData.map((data, index) => (
-            <tr key={index} className={index % 2 === 0 ? 'bg-gray-100' : ''}>
-              
-              <td className="p-3 text-center">{data.date}</td>
-              <td className="p-3 text-center">{data.classname}</td>
-              <td className="p-3 text-center">{data.subjectname}</td>
-              <td className="p-3 text-center">{data.periods}</td>
-              <td className="p-3 text-center">{data.type}</td>
-              <td className="p-3 text-center">{data.status}</td>
-              <td className="p-3 text-center">{data.createdon}</td>
-              <td className="p-3 text-center">{data.updatedon}</td>
-              <td className="p-3 text-center">
-              <div className='grid grid-cols-5 gap-2'>
-              <MdEdit onClick={()=>
-                {setEditModal(data)
-                 seteditbool(true)
-                }}/>
-              <MdDelete onClick={() => OnDelete(data.id)}/>
-              <FaFile onClick={() => setManual(data)}/>
-              {data.status == 0 ? <><FaCheck onClick={()=>Finalise(data.id)}/> <QrGenModal aid = {data.id}/> </> : ''}
-              {data.status == 1 ? <FaCheck onClick={()=>Finalise(data.id)}/> : ''}
-              </div>          
-              </td>
-              <td className="p-3 text-center">
-                {data.status == 0 && data.type == 'QR' && 
-                <div>
-                
-                </div>
-                }
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+        <Table data = {paginatedData}
+        columns={columns} actions={{
+          datarole : "attendance",
+          editattend : setEditModal,
+          delete : OnDelete,
+          manual : setManual,
+          final : Finalise,
+        }} />
       
       <div className="mt-4 flex flex-col justify-center items-center">
       <ReactPaginate

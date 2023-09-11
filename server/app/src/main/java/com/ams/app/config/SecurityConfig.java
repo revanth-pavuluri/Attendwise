@@ -1,5 +1,5 @@
 package com.ams.app.config;
-import com.ams.app.security.JwtAuthenticationFilterdemo;
+import com.ams.app.security.JwtAuthenticationFilter;
 import com.ams.app.service.MyUserDetailsService;
 import com.ams.app.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +22,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor(onConstructor = @__({@Autowired, @Lazy}))
-public class ASecurityConfig extends WebSecurityConfigurerAdapter {
+public class SecurityConfig extends WebSecurityConfigurerAdapter {
   
   private final MyUserDetailsService authUserService;
   
@@ -53,8 +53,8 @@ public class ASecurityConfig extends WebSecurityConfigurerAdapter {
   }
 
 
-  public JwtAuthenticationFilterdemo jwtAuthenticationFilter() throws Exception {
-    JwtAuthenticationFilterdemo filter = new JwtAuthenticationFilterdemo("/**/*");
+  public JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception {
+    JwtAuthenticationFilter filter = new JwtAuthenticationFilter("/**/*");
     filter.setAuthenticationManager(super.authenticationManagerBean());
     filter.userDetailsService = authUserService;
     filter.jwtTokenUtil = jwtTokenUtil;

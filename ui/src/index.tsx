@@ -8,7 +8,7 @@ import App from './App';
 import {  UserdetailsProvider } from './components/UserContext';
 import axios from "axios"
 
-axios.defaults.baseURL = 'http://app.ams.com'
+axios.defaults.baseURL = 'http://172.16.16.119:8080'
 axios.defaults.headers.post["Content-Type"] = 'application/json'
 axios.defaults.headers.post["Accept"] = '*/*'
 axios.defaults.headers.post["Access-Control-Allow-Origin"] = "*"
@@ -20,8 +20,8 @@ root.render(
   <React.StrictMode>
     
     <UserdetailsProvider>
-    <BrowserRouter basename="/ui/">
-        <App/>
+    <BrowserRouter>
+    <App/>
     </BrowserRouter>
     </UserdetailsProvider>
   

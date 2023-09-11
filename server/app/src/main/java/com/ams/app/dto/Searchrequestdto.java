@@ -2,7 +2,7 @@ package com.ams.app.dto;
 import lombok.Data;
 
 @Data
-public class Searchrequestdto{
+public class SearchrequestDTO{
     String column;
     String value;
     Operations operation;

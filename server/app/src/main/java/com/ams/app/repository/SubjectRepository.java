@@ -8,5 +8,6 @@ import com.ams.app.model.Subject;
 @Repository
 @Transactional
 public interface SubjectRepository extends JpaRepository<Subject, Integer>, JpaSpecificationExecutor<Subject>{
-    Subject findById(int id);
+    
+    Subject findById(Long id);
 }

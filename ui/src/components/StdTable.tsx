@@ -7,27 +7,19 @@ import axios from 'axios';
 import { useUserdetails } from './UserContext';
 import { toast } from 'react-toastify';
 import StdTableAddEdit from './StdTableAddEdit';
+import Table from './Table';
+import { get_all_students } from './services/Student';
 
 const itemsPerPage = 15;
-type FacStdProp =  {        
-    id: number,
-    username: string,            
-    name: string,            
-    device : string,            
-    rollnumber: number,
-    classname : string,           
-    createdon: string,            
-    updatedon: string          
-    
-}[];
 export type FinalFacStdProp = {
     id : number,
     username : string,
     name : string;
     rollnumber : number;
     classname : string;
+    [key: string]: any;
 };
-type FinalFacStdProps = FinalFacStdProp[];
+export type FinalFacStdProps = FinalFacStdProp[];
 
 
 const StdTable = () => {
@@ -54,37 +46,19 @@ const StdTable = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(0);
   const [AddModal, setAddModal] = useState(false);
-  const [EditModal,setEditModal] = useState<FinalFacStdProp>();
-  const [Editbool,seteditbool] = useState(false)
+  const [EditModal,setEditModal] = useState<FinalFacStdProp | false >();
   const [studentDetails,setStudentDetails] = useState<FinalFacStdProps>([])
+  const columns = [
+    { header: 'Student ID', key: 'username' },
+    { header: 'Name', key: 'name' },
+    { header: 'Roll no.', key: 'rollnumber' },
+    { header: 'Class', key: 'classname' },
+  ];
   useEffect(
     () => {
-        (async () =>{
-         await axios.get(`/student/all`)
-            .then((response) => {
-              if (response.status === 200) return response;
-              else if (response.status === 401 || response.status === 403) {
-                console.error("Invalid username or password");
-              } else {
-                console.error(
-                  "Something went wrong, try again later or reach out to trevor@coderscampus.com"
-                );
-              }
-            })
-            .then((response) => {
-              if (response) {
-                setStudentDetails(response.data)            
-              }
-            })
-            .catch((error) => {
-              // Handle errors here
-              console.error(error);
-              console.error("An error occurred during login.");
-            
-            })
-        })()
+      get_all_students(setStudentDetails)
     
- },[AddModal,Editbool,deleteFlag]);
+ },[AddModal,EditModal,deleteFlag]);
 
 
    
@@ -113,16 +87,16 @@ const StdTable = () => {
   return (
     <div className="mt-1">
       
-      {Editbool  || AddModal ? (
+      {EditModal != false  || AddModal ? (
         <Modal body={
           <>
           {AddModal ? <StdTableAddEdit handle={()=>{setAddModal(false)}}/> : null}
-          {Editbool ? <StdTableAddEdit handle ={()=>seteditbool(false)} initialData={EditModal}/> : null} 
+          {EditModal != false ? <StdTableAddEdit handle ={()=>setEditModal(false)} initialData={EditModal}/> : null} 
         </>
       }
       header = {
         {title : AddModal ? 'Add data' : 'Edit data',
-        closehandle : AddModal ? ()=>{setAddModal(false)} : ()=>{seteditbool(false)}}
+        closehandle : AddModal ? ()=>{setAddModal(false)} : ()=>{setEditModal(false)}}
       }
       /> 
       ) : null}
@@ -149,37 +123,12 @@ const StdTable = () => {
       </div>
       {filteredData.length != 0 ? (
         <>
-        
-        <table className="w-11/12 mx-auto border-rounded border border-gray-300 shadow-md">
-        <thead>
-          <tr className="bg-Aqua-300 text-Black shadow-md ">
-            <th className="p-3 text-center">Student ID</th>
-            <th className="p-3 text-center">Name</th>
-            <th className="p-3 text-center">Roll no.</th>
-            <th className="p-3 text-center">Class</th>
-            <th className="p-3 text-center">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {paginatedData.map((data, index) => (
-            <tr key={index} className={index % 2 === 0 ? 'bg-gray-100' : ''}>
-              <td className="p-3 text-center">{data.username}</td>
-              <td className="p-3 text-center">{data.name}</td>
-              <td className="p-3 text-center">{data.rollnumber}</td>
-              <td className="p-3 text-center">{data.classname}</td>
-              <td className="p-3 text-center">
-              <div className='grid grid-cols-2 gap-3'>
-              <MdEdit onClick={()=>
-                {setEditModal(data)
-                 seteditbool(true)
-                }}/>
-              <MdDelete onClick={() => OnDelete(data.id)}/>
-              </div>          
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+        <Table data={paginatedData} columns={columns} 
+            actions = {{
+              datarole : "student",
+              editstd : setEditModal,
+              delete : OnDelete,
+            }}  />
       
       <div className="mt-4 flex flex-col justify-center items-center">
       <ReactPaginate

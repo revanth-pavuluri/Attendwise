@@ -6,50 +6,46 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-
-import com.ams.app.dto.AttendanceReportdto;
-import com.ams.app.dto.Attendrecorddto;
-import com.ams.app.dto.Requestdto;
-import com.ams.app.dto.Studentdashrequestdto;
-import com.ams.app.dto.Studentdashresponsedto;
-import com.ams.app.mapper.AttendrecordMapper;
+import com.ams.app.dto.AttendanceReportDTO;
+import com.ams.app.dto.RequestDTO;
 import com.ams.app.mapper.StudentMapper;
-import com.ams.app.model.Absentdata;
-import com.ams.app.model.Attendrecord;
+import com.ams.app.model.AbsentData;
+import com.ams.app.model.AttendRecord;
 import com.ams.app.model.Student;
-import com.ams.app.model.Presentdata;
-import com.ams.app.repository.AbsentdataRepository;
-import com.ams.app.repository.AttendrecordRepository;
+import com.ams.app.model.AttendRecord.AttendanceStatus;
+import com.ams.app.model.PresentData;
+import com.ams.app.repository.AbsentDataRepository;
+import com.ams.app.repository.AttendRecordRepository;
 import com.ams.app.repository.StudentRepository;
 import com.ams.app.specification.CommonFilterSpecification;
-import com.ams.app.repository.PresentdataRepository;
+import lombok.RequiredArgsConstructor;
+import com.ams.app.repository.PresentDataRepository;
 
 @Service
+@RequiredArgsConstructor(onConstructor = @__({@Autowired}))
 public class AttendrecordService {
     
-    @Autowired
-    private AttendrecordRepository Arepo;
-    @Autowired
-    private AttendrecordMapper attendrecordMapper;
-    @Autowired
-    AbsentdataRepository absentdataRepository;
-     @Autowired
-    PresentdataRepository presentrepo;
-    @Autowired
-    StudentRepository Srepo;
-    @Autowired
-    StudentMapper studentMapper;
+    private AttendRecordRepository attendrecordRepository;
+    
+    private AbsentDataRepository absentdataRepository;
+    
+    private PresentDataRepository presentDataRepository;
+    
+    private StudentRepository studentRepository;
+    
+    private StudentMapper studentMapper;
+
+    private CommonFilterSpecification<AttendRecord> StudentFilterSpecification;
    
-    public ResponseEntity<Attendrecorddto> findById(int sid) {
+    public AttendRecord findById(Long id) {
         try{
-            Attendrecorddto s = attendrecordMapper.modelToDto(Arepo.findById(sid));
-            if(s == null){
+            AttendRecord attendrecord = attendrecordRepository.findById(id);
+            if(attendrecord == null){
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Id not found");
             }
-            return ResponseEntity.ok(s);
+            return attendrecord;
         }catch(ResponseStatusException e){
             throw new ResponseStatusException(e.getStatus(),e.getReason());
         }catch(Exception e){
@@ -57,30 +53,15 @@ public class AttendrecordService {
         }
     }
     
-    public ResponseEntity<List<Attendrecorddto>> findByFacultyId(int fid) {
+    public AttendRecord editAttendrecord(Long id, AttendRecord attendrecord){
         try{
-            List<Attendrecorddto> s = attendrecordMapper.modelsToDtos(Arepo.findByFaculty(fid));
-            if(s == null){
+            AttendRecord result = attendrecordRepository.findById(id);
+            if(result == null){
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Id not found");
             }
-            return ResponseEntity.ok(s);
-        }catch(ResponseStatusException e){
-            throw new ResponseStatusException(e.getStatus(),e.getReason());
-        }catch(Exception e){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,e.getMessage());
-        }
-    }
-    
-    public ResponseEntity<Attendrecorddto> editAttendrecord(int id, Attendrecorddto attendrecord){
-        try{
-            Attendrecord s = Arepo.findById(id);
-            if(s == null){
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Id not found");
-            }
-            Attendrecord record = attendrecordMapper.dtoToModel(attendrecord);
-            record.setId(id);
-            Attendrecord saved = Arepo.save(record);
-            return ResponseEntity.ok(attendrecordMapper.modelToDto(saved));
+            attendrecord.setId(id);
+            AttendRecord saved = attendrecordRepository.save(attendrecord);
+            return saved;
         }catch(ResponseStatusException e){
             throw new ResponseStatusException(e.getStatus(),e.getReason());
         }catch(Exception e){
@@ -88,66 +69,55 @@ public class AttendrecordService {
         }   
     }
 
-    public ResponseEntity<Attendrecorddto> save(Attendrecorddto attendrecord) {
+    public AttendRecord save(AttendRecord attendrecord) {
         try{
-            Attendrecord s = Arepo.save(attendrecordMapper.dtoToModel(attendrecord));
-            s.setId(0);
-            return ResponseEntity.ok(attendrecordMapper.modelToDto(s));
+            return attendrecordRepository.save(attendrecord);
         }catch(Exception e){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,e.getMessage());
         }
     }
     
-    public ResponseEntity<String> deleteAttendrecord(int id){
+    public String deleteAttendrecord(Long id){
         try{
-            Attendrecord s = Arepo.findById(id);
-                if(s == null){
+            AttendRecord attendrecord = attendrecordRepository.findById(id);
+                if(attendrecord == null){
                     throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Id not found");
                 }
-                Arepo.deleteById(id);
-                return ResponseEntity.ok("Deleted");
+                attendrecordRepository.deleteById(id.intValue());
+                return "Deleted";
             }catch(ResponseStatusException e){
             throw new ResponseStatusException(e.getStatus(),e.getReason());
         }catch(Exception e){
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,e.getMessage());
-        }
-        
-    }
-    public ResponseEntity<List<Attendrecorddto>> allAttendrecords(){
-         try{
-            return ResponseEntity.ok(attendrecordMapper.modelsToDtos(Arepo.findAll()));
-         }catch(Exception e){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,e.getMessage());
-         }
+        }  
     }
 
-    public ResponseEntity<String> markAttendance(int sid, int aid, boolean byfaculty){
+    
+
+    public String markAttendance(Long sid, Long aid, boolean byfaculty){
         try{
-            Attendrecord record = Arepo.findById(aid);
-            Student student = Srepo.findById(sid);
+            AttendRecord record = attendrecordRepository.findById(aid);
+            Student student = studentRepository.findById(sid);
             if(record == null || student==null){
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Id not found");
             }else if(byfaculty){
-                if(record.getStatus() == 2){
-                    Absentdata absentdata = absentdataRepository.findByAidAndSid(aid, sid);
+                if(record.getStatus() == AttendanceStatus.FINALIZED){
+                    AbsentData absentdata = absentdataRepository.findByAttendRecordIdAndStudentId(aid, sid);
                     absentdataRepository.delete(absentdata);
                 }else{
-                    Presentdata present = new Presentdata(student, record);
-                    presentrepo.save(present);
+                    PresentData present = new PresentData(student, record);
+                    presentDataRepository.save(present);
                 }
             }
-            else if(record.getStatus() == 1){
-                //0 - active
-                //1 - expired
-                //2 - finalized
+            else if(record.getStatus() == AttendanceStatus.EXPIRED){
                 throw new ResponseStatusException(HttpStatus.GATEWAY_TIMEOUT, "Request expired");
-            } else if(record.getStatus() == 2){
+            } else if(record.getStatus() == AttendanceStatus.FINALIZED){
                 throw new ResponseStatusException(HttpStatus.LOCKED,"Attendance finalized");
             }else{
-                Presentdata present = new Presentdata(student, record);
-                presentrepo.save(present);
+                PresentData present = new PresentData(student, record);
+                presentDataRepository.save(present);
             }
-            return ResponseEntity.ok(sid+" marked");
+            return sid+" marked";
         }catch(ResponseStatusException e){
             System.out.println(e.getReason());
             throw new ResponseStatusException(e.getStatus(),e.getReason());
@@ -156,20 +126,20 @@ public class AttendrecordService {
         }   
     }
 
-    public ResponseEntity<String> unmarkAttendance(int sid, int aid){
+    public String unmarkAttendance(Long sid, Long aid){
         try{
-            Attendrecord record = Arepo.findById(aid);
-            Student student = Srepo.findById(sid);
+            AttendRecord record = attendrecordRepository.findById(aid);
+            Student student = studentRepository.findById(sid);
             if(record == null || student == null){
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Id not found");
-            }else if(record.getStatus() == 2){
-                Absentdata absentdata = new Absentdata(student, record);
+            }else if(record.getStatus() == AttendanceStatus.FINALIZED){
+                AbsentData absentdata = new AbsentData(student, record);
                 absentdataRepository.save(absentdata);
             }else{
-                Presentdata present = presentrepo.findByAidAndSid(aid, sid);
-                presentrepo.delete(present);
+                PresentData present = presentDataRepository.findByAttendRecordIdAndStudentId(aid, sid);
+                presentDataRepository.delete(present);
             }
-            return ResponseEntity.ok(sid+" unmarked");
+            return sid+" unmarked";
         }catch(ResponseStatusException e){
             throw new ResponseStatusException(e.getStatus(),e.getReason());
         }catch(Exception e){
@@ -177,48 +147,49 @@ public class AttendrecordService {
         }   
     }
 
-    @Autowired
-    private CommonFilterSpecification<Attendrecord> StudentFilterSpecification;
 
-    public ResponseEntity<List<Attendrecorddto>> searchAttendrecords(Requestdto request) {
+
+
+    public List<AttendRecord> searchAttendrecords(RequestDTO request) {
         try{
-        Specification<Attendrecord> searchSpecification = StudentFilterSpecification.
-        getSearchSpecification(request.getSearch(), request.getOperator());
+            Specification<AttendRecord> searchSpecification = StudentFilterSpecification.
+            getSearchSpecification(request.getSearch(), request.getOperator());
             
-        return ResponseEntity.ok(attendrecordMapper.modelsToDtos(Arepo.findAll(searchSpecification)));
+            return attendrecordRepository.findAll(searchSpecification);
+
         }catch(Exception e){
             System.out.println(e.getMessage());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,e.getMessage());
         }
     }
 
-    public ResponseEntity<String> finalizeAttendance(int id){
+    public String finalizeAttendance(Long id){
         try{
-            Attendrecord attendrecord = Arepo.findById(id);
+            AttendRecord attendrecord = attendrecordRepository.findById(id);
                 if(attendrecord == null){
                     throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Id not found");
                 }
             
-            List<Student> students = Srepo.findByClassname(attendrecord.getClassname());
-            List<Presentdata> presentdata = presentrepo.findByAid(id);
-            List<Absentdata> absents = new ArrayList<>();
+            List<Student> students = studentRepository.findByClassName(attendrecord.getClassName());
+            List<PresentData> presentdata = presentDataRepository.findByAttendRecordId(id);
+            List<AbsentData> absents = new ArrayList<>();
             // Create a set of student IDs who are present
-            Set<Integer> presentStudentIds = presentdata.stream()
+            Set<Long> presentStudentIds = presentdata.stream()
                     .map(present -> present.getStudent().getId())
                     .collect(Collectors.toSet());
 
             // Iterate through the students and check if they are absent
             for (Student student : students) {
                 if (!presentStudentIds.contains(student.getId())) {
-                    Absentdata ab = new Absentdata(student,attendrecord);
+                    AbsentData ab = new AbsentData(student,attendrecord);
                     absents.add(ab);
                 }
             }
             absentdataRepository.saveAll(absents);
-            presentrepo.deleteAll(presentdata);
-            attendrecord.setStatus(2);
-            Arepo.save(attendrecord);
-            return ResponseEntity.ok("Finalized");
+            presentDataRepository.deleteAll(presentdata);
+            attendrecord.setStatus(AttendanceStatus.FINALIZED);
+            attendrecordRepository.save(attendrecord);
+            return "Finalized";
         }catch(ResponseStatusException e){
             throw new ResponseStatusException(e.getStatus(),e.getReason());
         }catch(Exception e){
@@ -227,55 +198,55 @@ public class AttendrecordService {
         
     }
 
-     public ResponseEntity<List<AttendanceReportdto>> attendanceReport(int aid){
+     public List<AttendanceReportDTO> attendanceReport(Long aid){
          try{
-            Attendrecord attendrecord = Arepo.findById(aid);
+            AttendRecord attendrecord = attendrecordRepository.findById(aid);
             if(attendrecord == null){
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Id not found");
             }
-            List<AttendanceReportdto> responsedata = new ArrayList<>();
-            List<Student> students = Srepo.findByClassname(attendrecord.getClassname());
-            if(attendrecord.getStatus() == 0 || attendrecord.getStatus() == 1){
+            List<AttendanceReportDTO> responsedata = new ArrayList<>();
+            List<Student> students = studentRepository.findByClassName(attendrecord.getClassName());
+            if(attendrecord.getStatus() == AttendanceStatus.ACTIVE || attendrecord.getStatus() == AttendanceStatus.EXPIRED){
                 
-                List<Presentdata> presentdata = presentrepo.findByAid(aid);
+                List<PresentData> presentdata = presentDataRepository.findByAttendRecordId(aid);
                 // Create a set of student IDs who are present
-                Set<Integer> presentStudentIds = presentdata.stream()
+                Set<Long> presentStudentIds = presentdata.stream()
                         .map(present -> present.getStudent().getId())
                         .collect(Collectors.toSet());
                 for (Student student : students) {
-                    AttendanceReportdto rep = studentMapper.maptoAttendancereportdto(student);
-                    if(attendrecord.getStatus() == 0){
+                    AttendanceReportDTO rep = studentMapper.maptoAttendancereportdto(student);
+                    if(attendrecord.getStatus() == AttendanceStatus.ACTIVE){
                         if(presentStudentIds.contains(student.getId())){
-                            rep.setStudentstatus("Present");
+                            rep.setStudentStatus("Present");
                         }else{
-                            rep.setStudentstatus("Not yet Marked");
+                            rep.setStudentStatus("Not yet Marked");
                         }
-                    }else if(attendrecord.getStatus() == 1) {
+                    }else if(attendrecord.getStatus() == AttendanceStatus.EXPIRED) {
                         if(presentStudentIds.contains(student.getId())){
-                            rep.setStudentstatus("Present");
+                            rep.setStudentStatus("Present");
                         }else{
-                            rep.setStudentstatus("Absent");
+                            rep.setStudentStatus("Absent");
                         }
                     }
                     responsedata.add(rep);
                 }
-            }else if (attendrecord.getStatus() == 2){
-                List<Absentdata> absentdata = absentdataRepository.findByAid(aid);
+            }else if (attendrecord.getStatus() == AttendanceStatus.FINALIZED){
+                List<AbsentData> absentdata = absentdataRepository.findByAttendRecordId(aid);
                 // Create a set of student IDs who are absent
-                Set<Integer> absentStudentIds = absentdata.stream()
+                Set<Long> absentStudentIds = absentdata.stream()
                         .map(absent -> absent.getStudent().getId())
                         .collect(Collectors.toSet());
                 for (Student student : students) {
-                    AttendanceReportdto rep = studentMapper.maptoAttendancereportdto(student);
+                    AttendanceReportDTO rep = studentMapper.maptoAttendancereportdto(student);
                     if(absentStudentIds.contains(student.getId())){
-                            rep.setStudentstatus("Absent");
+                            rep.setStudentStatus("Absent");
                         }else{
-                            rep.setStudentstatus("Present");
+                            rep.setStudentStatus("Present");
                         }
                     responsedata.add(rep);
                 }  
             }
-            return ResponseEntity.ok(responsedata);
+            return responsedata;
         }catch(Exception e){
             System.out.println(e.getMessage());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,e.getMessage());

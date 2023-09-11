@@ -1,16 +1,12 @@
 package com.ams.app.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
-public class Statsresponsedto {
-    private String subjectname;
+@AllArgsConstructor
+public class StatsresponseDTO {
+    private String subjectName;
     private float percentage;
-    private int subid;
-    
-    public Statsresponsedto(String subjectname, float percentage, int subid) {
-        this.subjectname = subjectname;
-        this.percentage = percentage;
-        this.subid = subid;
-    }
+    private int subjectId;
 }
